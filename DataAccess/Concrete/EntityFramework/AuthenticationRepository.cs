@@ -67,8 +67,8 @@ public class AuthenticationRepository : IAuthenticationServiceRepository
         User dbUser = (User)_context.Set<User>().AsNoTracking().FirstOrDefault(x => x.Email.Equals(login.Email));
         string tokenInfo = CreateAccessToken(dbUser);
 
-        RefreshToken refreshToken = GetRefreshToken();
-        SetRefreshToken(refreshToken, dbUser);
+        //RefreshToken refreshToken = GetRefreshToken();
+       // SetRefreshToken(refreshToken, dbUser);
 
         return new LoginResultDto() { Token = tokenInfo, UserId = dbUser.Id };
 

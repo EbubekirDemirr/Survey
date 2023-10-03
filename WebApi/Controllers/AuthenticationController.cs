@@ -47,9 +47,9 @@ public class AuthenticationController : ControllerBase
 
     [HttpPost]
     [Route("Login")]
-    public IDataResult<LoginResultDto> Login([FromBody] LoginViewModel model)
+    public async Task<IDataResult<LoginResultDto>> Login([FromBody] LoginViewModel model)
     {
-        return _authenticationService.Login(model);
+        return await _authenticationService.Login(model);
     }
 
 }

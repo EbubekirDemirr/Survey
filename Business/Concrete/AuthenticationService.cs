@@ -1,32 +1,62 @@
 ﻿using Business.Abstract;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
+using Entities.Concrete.DbEntities.Users;
 using Entities.Concrete.Models.UsersModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace Business.Concrete;
 
 public class AuthenticationService : IAuthenticationService
 {
     IAuthenticationServiceRepository _authenticationServiceRepository;
+    private readonly UserManager<User> _userManager;
 
-    public AuthenticationService(IAuthenticationServiceRepository authenticationServiceRepository)
+    public AuthenticationService(IAuthenticationServiceRepository authenticationServiceRepository, UserManager<User> userManager)
     {
         this._authenticationServiceRepository = authenticationServiceRepository;
+        _userManager = userManager;
     }
 
-    public IDataResult<LoginResultDto> Login(LoginViewModel login)
+    public async Task<IDataResult<LoginResultDto>> Login(LoginViewModel login)
     {
-        try
+        var result = false;
+        if (login is not null)
         {
+            var user = await _userManager.FindByEmailAsync(login.Email);
 
-            LoginResultDto resultDto = _authenticationServiceRepository.GetToken(login);
-
-            return new SuccessDataResult<LoginResultDto>(resultDto);
+            if (user != null)
+            {
+                result = await _userManager.CheckPasswordAsync(user, login.Password);
+            }
+            else
+            {
+                return new ErrorDataResult<LoginResultDto>("Şifreler doğğru değil");
+            }
         }
-        catch (Exception ex)
+        else
         {
-            return new ErrorDataResult<LoginResultDto>();
+            return new ErrorDataResult<LoginResultDto>("Model boş");
         }
+
+        if (result)
+        {
+            try
+            {
+                LoginResultDto resultDto = _authenticationServiceRepository.GetToken(login);
+
+                return new SuccessDataResult<LoginResultDto>(resultDto);
+            }
+            catch (Exception ex)
+            {
+                return new ErrorDataResult<LoginResultDto>(ex.Message);
+            }
+        }
+        else
+        {
+            return new ErrorDataResult<LoginResultDto>("Başarısız");
+        }
+      
     }
 
     public IDataResult<LoginResultDto> RefreshToken()
@@ -35,4 +65,6 @@ public class AuthenticationService : IAuthenticationService
 
         return new SuccessDataResult<LoginResultDto>(resultDto);
     }
+
+
 }

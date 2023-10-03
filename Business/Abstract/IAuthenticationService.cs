@@ -5,6 +5,6 @@ namespace Business.Abstract;
 
 public interface IAuthenticationService
 {
-    IDataResult<LoginResultDto> Login(LoginViewModel login);
+    Task<IDataResult<LoginResultDto>> Login(LoginViewModel login);
     IDataResult<LoginResultDto> RefreshToken();
 }
